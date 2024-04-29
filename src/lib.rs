@@ -6,12 +6,12 @@ use proc_macro::TokenStream;
 use std::{fs, io, path::Path};
 use quote::quote;
 
-use digest::{generic_array::GenericArray, Digest, DynDigest, OutputSizeUser};
+use digest::{Digest, DynDigest};
 use walkdir::WalkDir;
 
 fn hash_dir(path: impl AsRef<Path>, mut hasher: Box<dyn DynDigest>) -> io::Result<Box<[u8]>> {
 
-    for entry in WalkDir::new(path) {
+    for entry in WalkDir::new(path).sort_by(|a, b| { a.path().cmp(b.path()) }) {
         let entry = entry?;
 
         if entry.file_type().is_file() {
@@ -31,6 +31,7 @@ fn hash_dir(path: impl AsRef<Path>, mut hasher: Box<dyn DynDigest>) -> io::Resul
 ///use checksum_dir::checksum;
 ///const CHECKSUM: [u8; 32] = checksum!("./src");
 ///````
+///Files are sorted by path to create a deterministic ordering.
 #[proc_macro]
 pub fn checksum(input: TokenStream) -> TokenStream {
 
@@ -47,7 +48,7 @@ pub fn checksum(input: TokenStream) -> TokenStream {
     };
 
     let path = string_lit.value().to_owned();
-    let mut hasher = get_hasher();
+    let hasher = get_hasher();
 
     let hash = hash_dir(path, hasher).unwrap();
 
@@ -63,6 +64,7 @@ macro_rules! init_hashers {
     };
 }
 
+#[allow(unreachable_code)]
 fn get_hasher() -> Box<dyn DynDigest> {
     init_hashers! {
     blake2::Blake2s256; "blake2",
