@@ -5,7 +5,7 @@ edition = "2021"
 readme = "readme.md"
 license = "MIT OR Apache-2.0"
 description = "generate checksums of directories at compile time"
-homepage = "https://github.com/JamieH01/checksum_dir"
+repository = "https://github.com/JamieH01/checksum_dir"
 keywords =[ "hash", "checksum", "validation", "macro" ]
 catagories = [ "cryptography", "authentication" ]
 
